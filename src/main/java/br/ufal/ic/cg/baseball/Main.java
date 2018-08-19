@@ -28,6 +28,8 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				canvas.setBresenham();
+				if(canvas.getBresenham()) bresenham.setText("Normal");
+				else bresenham.setText("Bresenham");
 			}
 			
 		});
