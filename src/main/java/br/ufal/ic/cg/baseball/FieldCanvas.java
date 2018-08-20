@@ -146,20 +146,21 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	private void drawHomeBase(GL2 gl, int centerX, int centerY, int radius) {
 		drawBase(gl, centerX, centerY, radius);
 		gl.glColor3f(1, 1, 1);
-        gl.glLineWidth(3);
-        gl.glBegin(GL2.GL_LINE_STRIP);
-        	gl.glVertex2i(centerX+radius/7, centerY+radius/3);
-			gl.glVertex2i(centerX+radius/3, centerY+radius/3);
-			gl.glVertex2i(centerX+radius/3, centerY-radius/3);
-			gl.glVertex2i(centerX+radius/7, centerY-radius/3);
-		gl.glEnd();
-		gl.glBegin(GL2.GL_LINE_STRIP);
-	    	gl.glVertex2i(centerX-radius/7, centerY+radius/3);
-			gl.glVertex2i(centerX-radius/3, centerY+radius/3);
-			gl.glVertex2i(centerX-radius/3, centerY-radius/3);
-			gl.glVertex2i(centerX-radius/7, centerY-radius/3);
-		gl.glEnd();
-    	gl.glLineWidth(10);
+		if(bresenham) {
+			drawBresenhamLine(gl, centerX+radius/7, centerY+radius/3, centerX+radius/3, centerY+radius/3);
+	        drawBresenhamLine(gl, centerX+radius/3, centerY-radius/3, centerX+radius/3, centerY+radius/3);
+	        drawBresenhamLine(gl, centerX+radius/7, centerY-radius/3, centerX+radius/3, centerY-radius/3);
+	        drawBresenhamLine(gl, centerX-radius/3, centerY+radius/3, centerX-radius/7, centerY+radius/3);
+	        drawBresenhamLine(gl, centerX-radius/3, centerY-radius/3, centerX-radius/3, centerY+radius/3);
+	        drawBresenhamLine(gl, centerX-radius/3, centerY-radius/3, centerX-radius/7, centerY-radius/3);
+		} else {
+			drawLine(gl, centerX+radius/7, centerY+radius/3, centerX+radius/3, centerY+radius/3);
+	        drawLine(gl, centerX+radius/3, centerY-radius/3, centerX+radius/3, centerY+radius/3);
+	        drawLine(gl, centerX+radius/7, centerY-radius/3, centerX+radius/3, centerY-radius/3);
+	        drawLine(gl, centerX-radius/3, centerY+radius/3, centerX-radius/7, centerY+radius/3);
+	        drawLine(gl, centerX-radius/3, centerY-radius/3, centerX-radius/3, centerY+radius/3);
+	        drawLine(gl, centerX-radius/3, centerY-radius/3, centerX-radius/7, centerY-radius/3);
+		}
 	}
 	
 	public void drawBresenhamCircle(GL2 gl, int radius) {
@@ -213,37 +214,76 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	}
 	
 	public void drawBresenhamLine(GL2 gl, int x1, int y1, int x2, int y2) {
-		int dx = x2 - x1;
-		int dy = y2 - y1;
-		int d = 2 * dy - dx;
-		int incE = 2 * dy;
-		int incNE = 2 * (dy - dx);
-		int x = x1;
-		int y = y1;
-		drawPixel(gl, x, y);
-		while(x < x2) {
-			if(d <= 0) {
-				//E
-				d += incE;
-				x++;
-			} else {
-				//NE
-				d += incNE;
-				x++;
-				y++;
+		if(x1 == x2) {
+			int aux = x1;
+			x1 = y1;
+			y1 = aux;
+			aux = x2;
+			x2 = y2;
+			y2 = aux;
+			int dx = x2 - x1;
+			int dy = y2 - y1;
+			int d = 2 * dy - dx;
+			int incE = 2 * dy;
+			int incNE = 2 * (dy - dx);
+			int x = x1;
+			int y = y1;
+			drawPixel(gl, y, x);
+			while(x < x2) {
+				if(d <= 0) {
+					//E
+					d += incE;
+					x++;
+				} else {
+					//NE
+					d += incNE;
+					x++;
+					y++;
+				}
+				drawPixel(gl, y, x);
 			}
+		} else {
+			int dx = x2 - x1;
+			int dy = y2 - y1;
+			int d = 2 * dy - dx;
+			int incE = 2 * dy;
+			int incNE = 2 * (dy - dx);
+			int x = x1;
+			int y = y1;
 			drawPixel(gl, x, y);
+			while(x < x2) {
+				if(d <= 0) {
+					//E
+					d += incE;
+					x++;
+				} else {
+					//NE
+					d += incNE;
+					x++;
+					y++;
+				}
+				drawPixel(gl, x, y);
+			}
 		}
 	}
 	
 	void drawLine(GL2 gl, int x1, int y1, int x2, int y2) {
 		int x, y;
 		float a;
-		a = (y2 - y1)/(x2 - x1);
-		for(x = x1; x <= x2; x++) {
-			y = (int) (y1+a*(x-x1));
-			drawPixel(gl, x, y);
+		if(x1 != x2) {
+			a = (y2 - y1)/(x2 - x1);
+			for(x = x1; x <= x2; x++) {
+				y = (int) (y1+a*(x-x1));
+				drawPixel(gl, x, y);
+			}
+		} else {
+			a = (x2 - x1)/(y2 - y1);
+			for(y = y1; y <= y2; y++) {
+				x = (int) (x1+a*(y-y1));
+				drawPixel(gl, x, y);
+			}
 		}
+		
 	}
 	
 	void drawPixel(GL2 gl, int x, int y) {
