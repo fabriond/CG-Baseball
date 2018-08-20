@@ -23,7 +23,9 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	public void init(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 		drawable.setGL(new DebugGL2(gl));
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		gl.glClearColor(0.2f, 0.5f, 0.0f, 0.0f);
+		gl.glLineWidth(10);
+		gl.glPointSize(2);
 	}
 
 	@Override
@@ -42,33 +44,63 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 		gl.glOrtho(0, 1600, 0, 1600, -1, 1);
         
         gl.glMatrixMode(GL2.GL_MODELVIEW);
-	    gl.glLoadIdentity();
-	    
-        gl.glColor3f(0, 0.5f, 0);
-	    
-    	gl.glPushMatrix();
-	        gl.glTranslatef(800, 400, 0);
-	        if(bresenham) drawBresenhamCircle(gl, 800);
-	        else drawCircle(gl, 800);
-	        gl.glRotatef(45.0f, 0, 0, 1);
-	        if(bresenham) drawBresenhamCircle(gl, 800);
-	        else drawCircle(gl, 800);
-        gl.glPopMatrix();
-        
+	    gl.glLoadIdentity();        
         
        	gl.glColor3f(0.625f, 0.32f, 0.176f);
-       
+       	//draw outer field outline
+       	drawOuterField(gl);
+       	//draw inner field
+       	drawInnerField(gl);
+       	
+        gl.glColor3f(0, 0.5f, 0);
+        //draw inner diamond
+        drawDiamond(gl);
+        
+	    //draw foul lines
+        gl.glColor3f(1f, 1f, 1f);
+	    drawFoulLines(gl);
+	    
+	    gl.glColor3f(0.625f, 0.32f, 0.176f);
+    	gl.glPushMatrix();
+	        if(bresenham) drawFullBresenhamCircle(gl, 800, 420, 100);
+	        else drawFullCircle(gl, 800, 420, 100);
+        gl.glPopMatrix();
+	    gl.glFlush();
+	}
+	
+	private void drawOuterField(GL2 gl) {
        	gl.glPushMatrix();
 	        gl.glTranslatef(800, 400, 0);
-	        if(bresenham) drawBresenhamCircle(gl, 500);
-	        else drawCircle(gl, 500);
+	        gl.glBegin(GL2.GL_LINE_STRIP);
+		        if(bresenham) drawBresenhamCircle(gl, 800);
+		        else drawCircle(gl, 800);
+		        gl.glVertex2i(0, 0);
+		    gl.glEnd();
 	        gl.glRotatef(45.0f, 0, 0, 1);
-	        if(bresenham) drawBresenhamCircle(gl, 500);
-	        else drawCircle(gl, 500);
+	        gl.glBegin(GL2.GL_LINE_STRIP);
+		        gl.glVertex2i(0, 0);    
+		        if(bresenham) drawBresenhamCircle(gl, 800);
+		        else drawCircle(gl, 800);
+	        gl.glEnd();
         gl.glPopMatrix();
-
-        gl.glColor3f(0, 0.5f, 0);
-       	gl.glPushMatrix();
+	}
+	
+	private void drawInnerField(GL2 gl) {
+		gl.glPushMatrix();
+	        gl.glTranslatef(800, 400, 0);
+	        for(int i = 0; i < 2; ++i) {
+		        gl.glBegin(GL2.GL_TRIANGLE_FAN);
+		        	gl.glVertex2i(0, 0);
+			        if(bresenham) drawBresenhamCircle(gl, 500);
+			        else drawCircle(gl, 500);
+			    gl.glEnd();
+		        gl.glRotatef(45.0f, 0, 0, 1);
+	        }
+        gl.glPopMatrix();
+	}
+	
+	private void drawDiamond(GL2 gl) {
+		gl.glPushMatrix();
 	        gl.glTranslatef(800, 430, 0);
 	        gl.glBegin(GL2.GL_QUADS);
 			    gl.glVertex2i(-200, 200);
@@ -76,10 +108,11 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 			    gl.glVertex2i(200, 200);
 			    gl.glVertex2i(0, 0);
 		    gl.glEnd();
-       	gl.glPopMatrix();
-	    gl.glColor3f(1f, 1f, 1f);
-
-	    gl.glPushMatrix();
+	   	gl.glPopMatrix();
+	}
+	
+	private void drawFoulLines(GL2 gl) {
+		gl.glPushMatrix();
 	        gl.glTranslatef(780, 420, 0);
 		    if(bresenham) drawBresenhamLine(gl, 0, 0, 600, 600);
 	        else drawLine(gl, 0, 0, 600, 600);
@@ -88,53 +121,58 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 		    if(bresenham) drawBresenhamLine(gl, 0, 0, 600, 600);
 	        else drawLine(gl, 0, 0, 600, 600);
 	    gl.glPopMatrix();
-	    
-	    gl.glColor3f(0.625f, 0.32f, 0.176f);
-	    
-
-    	gl.glPushMatrix();
-	        gl.glTranslatef(800, 420, 0);
-	        for(int j = 0; j < 8; ++j) {
-		        if(bresenham) drawBresenhamCircle(gl, 100);
-		        else drawCircle(gl, 100);
-		        gl.glRotatef(45.0f, 0, 0, 1);
-	        }
-        gl.glPopMatrix();
-	    gl.glFlush();
 	}
 	
 	public void drawBresenhamCircle(GL2 gl, int radius) {
 		int x = 0;
 		int y = radius;
 		float d = 5/4 - radius;
-		gl.glBegin(GL2.GL_TRIANGLE_FAN);
-			gl.glVertex2i(0, 0);
-			while(x <= y) {
-				gl.glVertex2i(x, y);
-				if(d < 0) {
-					//E
-					d += 2 * x + 3;
-					x++;
-				} else {
-					//SE
-					d += 2 * (x-y) + 5;
-					x++;
-					y--;
-				}
+		while(x <= y) {
+			gl.glVertex2i(x, y);
+			if(d < 0) {
+				//E
+				d += 2 * x + 3;
+				x++;
+			} else {
+				//SE
+				d += 2 * (x-y) + 5;
+				x++;
+				y--;
 			}
-		gl.glEnd();
+		}
+	}
+	
+	private void drawFullBresenhamCircle(GL2 gl, int centerX, int centerY, int radius) {
+		gl.glTranslatef(centerX, centerY, 0);
+		for(int j = 0; j < 8; ++j) {
+			gl.glBegin(GL2.GL_TRIANGLE_FAN);
+				gl.glVertex2i(0, 0);
+				drawBresenhamCircle(gl, radius);
+			gl.glEnd();
+	        gl.glRotatef(44.0f, 0, 0, 1);
+	        
+        }
+		drawBresenhamCircle(gl, radius);
 	}
 	
 	public void drawCircle(GL2 gl, int radius) {
-    	//y = +- sqrt(r*r-x*x);
-		gl.glBegin(GL2.GL_TRIANGLE_FAN);
-			gl.glVertex2f(0, 0);
-			int y = (int) Math.sqrt(radius*radius);
-			for(int x = 0; x <= y; x++){
-				gl.glVertex2i(x, y);
-				y = (int) Math.sqrt(radius*radius - x*x);
-			}
-		gl.glEnd();
+		int y = (int) Math.sqrt(radius*radius);
+		for(int x = 0; x <= y; x++){
+			gl.glVertex2i(x, y);
+			y = (int) Math.sqrt(radius*radius - x*x);
+		}
+	}
+	
+	public void drawFullCircle(GL2 gl, int centerX, int centerY, int radius) {
+		gl.glTranslatef(centerX, centerY, 0);
+		for(int j = 0; j < 8; ++j) {
+			gl.glBegin(GL2.GL_TRIANGLE_FAN);
+				gl.glVertex2i(0, 0);
+				drawCircle(gl, radius);
+			gl.glEnd();
+	        gl.glRotatef(44.0f, 0, 0, 1);
+        }
+		drawCircle(gl, radius);
 	}
 	
 	public void drawBresenhamLine(GL2 gl, int x1, int y1, int x2, int y2) {
