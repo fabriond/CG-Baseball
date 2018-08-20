@@ -9,7 +9,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
-	private boolean bresenham = true;
+	private boolean bresenham = false;
 	
 	private static final long serialVersionUID = 1L;
 
@@ -66,7 +66,17 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	        if(bresenham) drawBresenhamCircle(gl, 500);
 	        else drawCircle(gl, 500);
         gl.glPopMatrix();
-       	
+
+        gl.glColor3f(0, 0.5f, 0);
+       	gl.glPushMatrix();
+	        gl.glTranslatef(800, 430, 0);
+	        gl.glBegin(GL2.GL_QUADS);
+			    gl.glVertex2i(-200, 200);
+			    gl.glVertex2i(0, 400);
+			    gl.glVertex2i(200, 200);
+			    gl.glVertex2i(0, 0);
+		    gl.glEnd();
+       	gl.glPopMatrix();
 	    gl.glColor3f(1f, 1f, 1f);
 
 	    gl.glPushMatrix();
@@ -98,9 +108,9 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 		int y = radius;
 		float d = 5/4 - radius;
 		gl.glBegin(GL2.GL_TRIANGLE_FAN);
-			gl.glVertex2f(0, 0);
-			while(y >= x) {
-				gl.glVertex2f(x, y);
+			gl.glVertex2i(0, 0);
+			while(x <= y) {
+				gl.glVertex2i(x, y);
 				if(d < 0) {
 					//E
 					d += 2 * x + 3;
@@ -119,9 +129,10 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
     	//y = +- sqrt(r*r-x*x);
 		gl.glBegin(GL2.GL_TRIANGLE_FAN);
 			gl.glVertex2f(0, 0);
-			for(int x = 0; x < Math.sqrt(radius)*Math.cos(Math.PI/4); ++x) {
-				System.out.println(x+" "+(int) Math.sqrt(radius*radius - x*x));
-				gl.glVertex2i(x, (int) Math.sqrt(radius*radius - x*x));
+			int y = (int) Math.sqrt(radius*radius);
+			for(int x = 0; x <= y; x++){
+				gl.glVertex2i(x, y);
+				y = (int) Math.sqrt(radius*radius - x*x);
 			}
 		gl.glEnd();
 	}
