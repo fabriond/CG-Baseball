@@ -56,15 +56,21 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
         //draw inner diamond
         drawDiamond(gl);
         
+        drawBase(gl, 800, 440, 80);
+	    drawBase(gl, 615, 640, 45);
+	    drawBase(gl, 985, 640, 45);
+	    drawBase(gl, 800, 620, 55);
+	    drawBase(gl, 800, 820, 45);
+	    
 	    //draw foul lines
         gl.glColor3f(1f, 1f, 1f);
 	    drawFoulLines(gl);
 	    
-	    gl.glColor3f(0.625f, 0.32f, 0.176f);
-    	gl.glPushMatrix();
+	    
+    	/*gl.glPushMatrix();
 	        if(bresenham) drawFullBresenhamCircle(gl, 800, 420, 100);
 	        else drawFullCircle(gl, 800, 420, 100);
-        gl.glPopMatrix();
+        gl.glPopMatrix();*/
 	    gl.glFlush();
 	}
 	
@@ -123,6 +129,20 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	    gl.glPopMatrix();
 	}
 	
+	private void drawBase(GL2 gl, int centerX, int centerY, int radius) {
+		gl.glPushMatrix();
+			gl.glColor3f(0.625f, 0.32f, 0.176f);
+			if(bresenham) drawFullBresenhamCircle(gl, centerX, centerY, radius);
+        	else drawFullCircle(gl, centerX, centerY, radius);
+        gl.glPopMatrix();
+        gl.glColor3f(1, 1, 1);
+        gl.glPointSize(5);
+    	gl.glBegin(GL2.GL_POINTS);
+    		gl.glVertex2i(centerX, centerY);
+    	gl.glEnd();
+    	gl.glPointSize(2);
+	}
+	
 	public void drawBresenhamCircle(GL2 gl, int radius) {
 		int x = 0;
 		int y = radius;
@@ -144,15 +164,14 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	private void drawFullBresenhamCircle(GL2 gl, int centerX, int centerY, int radius) {
 		gl.glTranslatef(centerX, centerY, 0);
-		for(int j = 0; j < 8; ++j) {
+		for(int j = 0; j < 9; ++j) {
 			gl.glBegin(GL2.GL_TRIANGLE_FAN);
 				gl.glVertex2i(0, 0);
 				drawBresenhamCircle(gl, radius);
 			gl.glEnd();
-	        gl.glRotatef(44.0f, 0, 0, 1);
-	        
+	        gl.glRotatef(44f, 0, 0, 1);
         }
-		drawBresenhamCircle(gl, radius);
+
 	}
 	
 	public void drawCircle(GL2 gl, int radius) {
@@ -170,9 +189,8 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 				gl.glVertex2i(0, 0);
 				drawCircle(gl, radius);
 			gl.glEnd();
-	        gl.glRotatef(44.0f, 0, 0, 1);
+	        gl.glRotatef(45.0f, 0, 0, 1);
         }
-		drawCircle(gl, radius);
 	}
 	
 	public void drawBresenhamLine(GL2 gl, int x1, int y1, int x2, int y2) {
