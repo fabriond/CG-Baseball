@@ -56,7 +56,6 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
         //draw inner diamond
         drawDiamond(gl);
         
-        drawBase(gl, 800, 440, 80);
 	    drawBase(gl, 615, 640, 45);
 	    drawBase(gl, 985, 640, 45);
 	    drawBase(gl, 800, 620, 55);
@@ -66,6 +65,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
         gl.glColor3f(1f, 1f, 1f);
 	    drawFoulLines(gl);
 	    
+	    drawHomeBase(gl, 800, 440, 80);
 	    
     	/*gl.glPushMatrix();
 	        if(bresenham) drawFullBresenhamCircle(gl, 800, 420, 100);
@@ -136,11 +136,30 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
         	else drawFullCircle(gl, centerX, centerY, radius);
         gl.glPopMatrix();
         gl.glColor3f(1, 1, 1);
-        gl.glPointSize(5);
+        gl.glPointSize(7);
     	gl.glBegin(GL2.GL_POINTS);
     		gl.glVertex2i(centerX, centerY);
     	gl.glEnd();
     	gl.glPointSize(2);
+	}
+	
+	private void drawHomeBase(GL2 gl, int centerX, int centerY, int radius) {
+		drawBase(gl, centerX, centerY, radius);
+		gl.glColor3f(1, 1, 1);
+        gl.glLineWidth(3);
+        gl.glBegin(GL2.GL_LINE_STRIP);
+        	gl.glVertex2i(centerX+radius/7, centerY+radius/3);
+			gl.glVertex2i(centerX+radius/3, centerY+radius/3);
+			gl.glVertex2i(centerX+radius/3, centerY-radius/3);
+			gl.glVertex2i(centerX+radius/7, centerY-radius/3);
+		gl.glEnd();
+		gl.glBegin(GL2.GL_LINE_STRIP);
+	    	gl.glVertex2i(centerX-radius/7, centerY+radius/3);
+			gl.glVertex2i(centerX-radius/3, centerY+radius/3);
+			gl.glVertex2i(centerX-radius/3, centerY-radius/3);
+			gl.glVertex2i(centerX-radius/7, centerY-radius/3);
+		gl.glEnd();
+    	gl.glLineWidth(10);
 	}
 	
 	public void drawBresenhamCircle(GL2 gl, int radius) {
