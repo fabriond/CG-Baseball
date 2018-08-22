@@ -31,9 +31,11 @@ public class Main {
 		JPanel jpanel = new JPanel();
 		JButton bresenhamToggle = new JButton("Change drawing mode");
 		JButton clearStands = new JButton("Reset Stands");
+		JButton undoStand = new JButton("Undo");
 		JLabel staticLabel = new JLabel("Drawing mode:");
 		JLabel drawMode = new JLabel(canvas.getDrawingMode());
 		JSlider lineWidthSlider = new JSlider(JSlider.HORIZONTAL, 0, 50, 25);
+		ColorPickerButton colorPicker = new ColorPickerButton(Color.WHITE);
 		bresenhamToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -50,7 +52,6 @@ public class Main {
 			}
 			
 		});
-		ColorPickerButton colorPicker = new ColorPickerButton(Color.WHITE);
 		colorPicker.addColorChangedListener(new ColorChangedListener() {
 		    @Override
 		    public void colorChanged(Color newColor) {
@@ -62,7 +63,14 @@ public class Main {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				canvas.setMouseWidth(lineWidthSlider.getValue());
-				canvas.display();
+			}
+			
+		});
+		undoStand.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				canvas.undoStand();				
 			}
 			
 		});
@@ -73,6 +81,7 @@ public class Main {
 		lineWidthSlider.setPaintTicks(true);
 		lineWidthSlider.setValue(3);
 		jpanel.add(clearStands);
+		jpanel.add(undoStand);
 		jpanel.add(bresenhamToggle);
 		jpanel.add(staticLabel);
 		jpanel.add(drawMode);

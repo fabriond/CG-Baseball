@@ -22,6 +22,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	private int mouseWidth = 4;
 	
 	List<Point> stands = new ArrayList<>();
+	List<Color> standColors = new ArrayList<>();
 	
 	private static final long serialVersionUID = 1L;
 
@@ -203,9 +204,11 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	}
 	
 	public void drawStands(MyGL gl) {
-		gl.glColor4f(mouseColor.getRed(), mouseColor.getGreen(), mouseColor.getBlue(), mouseColor.getAlpha());
 		gl.glPointSize(mouseWidth);
 		for(int i = 0; i < stands.size()-1; i++) {
+			float currentColor[] = {1f, 1f, 1f, 1f};
+			standColors.get(i+1).getColorComponents(currentColor);
+			gl.glColor4f(currentColor[0], currentColor[1], currentColor[2], currentColor[3]);
 	    	if(bresenham) gl.drawBresenhamLine(stands.get(i).x, stands.get(i).y, stands.get(i+1).x, stands.get(i+1).y);
 	    	else gl.drawLine(stands.get(i).x, stands.get(i).y, stands.get(i+1).x, stands.get(i+1).y);
 	    }
@@ -214,6 +217,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	public void addStands(int x, int y) {
 		stands.add(new Point(x, y));
+		standColors.add(mouseColor);
 	}
 	
 	public String getDrawingMode() {
@@ -237,6 +241,15 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 
 	public void setMouseWidth(int mouseWidth) {
 		this.mouseWidth = mouseWidth;
+		display();
+	}
+	
+	public void undoStand() {
+		if(stands.size() > 0) {
+			stands.remove(stands.size()-1);
+			standColors.remove(standColors.size()-1);
+			display();
+		}
 	}
 
 	public Color getMouseColor() {
@@ -245,6 +258,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	public void setMouseColor(Color mouseColor) {
 		this.mouseColor = mouseColor;
+		display();
 	}
 
 	@Override
