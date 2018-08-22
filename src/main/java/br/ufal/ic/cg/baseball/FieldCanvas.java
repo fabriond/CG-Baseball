@@ -17,9 +17,9 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	private boolean bresenham = true;
 	
-	private boolean changed = true;
-	
 	private Color mouseColor = Color.WHITE;
+	
+	private int mouseWidth = 4;
 	
 	List<Point> stands = new ArrayList<>();
 	
@@ -36,19 +36,16 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 		GL2 gl = drawable.getGL().getGL2();
 		drawable.setGL(new MyGL(gl));
 				
-		gl.glClearColor(0.2f, 0.5f, 0.0f, 0.0f);
+		gl.glClearColor(0.0f, 0.5f, 0.0f, 0.0f);
 		gl.glLineWidth(10);
 		gl.glPointSize(4);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
-		System.out.println(drawable.getSurfaceWidth()+" "+drawable.getSurfaceHeight());
 		gl.glOrtho(0, drawable.getSurfaceWidth(), 0, drawable.getSurfaceHeight(), -1, 1);
 		addMouseListener(new MouseAdapter() {
-        	
-			public void mouseClicked(MouseEvent arg0) {
+			
+			public void mousePressed(MouseEvent arg0) {
 				addStands(arg0.getX(), (getHeight() - arg0.getY()));
-				System.out.println(arg0.getX()+" "+(getHeight() - arg0.getY()));
-				System.out.println("here");
 				display();
 			}
 			
@@ -65,13 +62,11 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	public void display(GLAutoDrawable drawable) {
 		MyGL gl = new MyGL(drawable.getGL().getGL2());
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-        System.out.println(stands.size());
         
         gl.glMatrixMode(GL2.GL_MODELVIEW);
 	    gl.glLoadIdentity();
 	    
        	gl.glPushMatrix();
-       		drawStands(gl);
        		gl.glTranslatef(400, 200, 0);
 	       	gl.glColor3f(0.625f, 0.32f, 0.176f);
 	       	//draw outer field outline
@@ -84,8 +79,8 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	        drawDiamond(gl);
 	        
 	        //draw regular bases
-        	drawBase(gl, -92, 130, 22);
-        	drawBase(gl, 92, 130, 22);
+        	drawBase(gl, -93, 130, 22);
+        	drawBase(gl, 93, 130, 22);
         	drawBase(gl, 0, 210, 27);
 	        
 	        
@@ -94,17 +89,17 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 		    drawFoulLines(gl);
 		    
 		    //draw pitcher's mound
-		    drawPitcherBase(gl, 0, 110, 22);
+		    drawPitcherBase(gl, 0, 125, 22);
 		    
 		    //draw the home base
 		    drawHomeBase(gl, 0, 20, 40);
 		gl.glPopMatrix();
+   		drawStands(gl); // positioning of this line makes stands go over the field when drawing
 	    gl.glFlush();
 	}
 	
 	private void drawOuterField(MyGL gl) {
        	gl.glPushMatrix();
-	        //gl.glTranslatef(800, 400, 0);
 	        gl.glBegin(GL2.GL_LINE_STRIP);
 		        if(bresenham) gl.drawBresenhamCircle(400);
 		        else gl.drawCircle(400);
@@ -121,7 +116,6 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	private void drawInnerField(MyGL gl) {
 		gl.glPushMatrix();
-	        //gl.glTranslatef(800, 400, 0);
 	        for(int i = 0; i < 2; ++i) {
 		        gl.glBegin(GL2.GL_TRIANGLE_FAN);
 		        	gl.glVertex2i(0, 0);
@@ -136,7 +130,6 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	private void drawDiamond(MyGL gl) {
 		gl.glPushMatrix();
 			gl.glTranslatef(0, 30, 0);
-	        //gl.glTranslatef(800, 430, 0);
 	        gl.glBegin(GL2.GL_QUADS);
 			    gl.glVertex2i(-100, 100);
 			    gl.glVertex2i(0, 200);
@@ -148,8 +141,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	private void drawFoulLines(MyGL gl) {
 		gl.glPushMatrix();
-			gl.glTranslatef(-20, 10, 0);
-	        //gl.glTranslatef(780, 420, 0);
+			gl.glTranslatef(-20, 5, 0);
 		    if(bresenham) gl.drawBresenhamLine(0, 0, 300, 300);
 	        else gl.drawLine(0, 0, 300, 300);
 		    gl.glTranslatef(40, 0, 0);
@@ -167,11 +159,11 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
         gl.glPopMatrix();
         
         gl.glColor3f(1, 1, 1);
-        gl.glPointSize(4);
+        gl.glPointSize(8);
     	gl.glBegin(GL2.GL_POINTS);
     		gl.glVertex2i(centerX, centerY);
     	gl.glEnd();
-    	gl.glPointSize(2);
+    	gl.glPointSize(3);
 	}
 	
 	private void drawHomeBase(MyGL gl, int centerX, int centerY, int radius) {
@@ -198,7 +190,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 		drawBase(gl, centerX, centerY, radius);
 		//clears the dot at the center of the base
 		gl.glColor3f(0.625f, 0.32f, 0.176f);
-		gl.glPointSize(7);
+		gl.glPointSize(8);
     	gl.glBegin(GL2.GL_POINTS);
     		gl.glVertex2i(centerX, centerY);
     	gl.glEnd();
@@ -212,9 +204,12 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	public void drawStands(MyGL gl) {
 		gl.glColor4f(mouseColor.getRed(), mouseColor.getGreen(), mouseColor.getBlue(), mouseColor.getAlpha());
-	   	for(int i = 0; i < stands.size()-1; i+=2) {
-	    	gl.drawBresenhamLine(stands.get(i).x, stands.get(i).y, stands.get(i+1).x, stands.get(i+1).y);
+		gl.glPointSize(mouseWidth);
+		for(int i = 0; i < stands.size()-1; i++) {
+	    	if(bresenham) gl.drawBresenhamLine(stands.get(i).x, stands.get(i).y, stands.get(i+1).x, stands.get(i+1).y);
+	    	else gl.drawLine(stands.get(i).x, stands.get(i).y, stands.get(i+1).x, stands.get(i+1).y);
 	    }
+		gl.glPointSize(4);
 	}
 	
 	public void addStands(int x, int y) {
@@ -228,10 +223,22 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	public void changeDrawingMode() {
 		bresenham = !bresenham;
-		changed = true;
 		display();
 	}
 	
+	public void clearStands() {
+		stands.clear();
+		display();
+	}
+	
+	public int getMouseWidth() {
+		return mouseWidth;
+	}
+
+	public void setMouseWidth(int mouseWidth) {
+		this.mouseWidth = mouseWidth;
+	}
+
 	public Color getMouseColor() {
 		return mouseColor;
 	}

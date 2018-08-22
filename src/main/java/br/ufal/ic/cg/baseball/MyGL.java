@@ -60,15 +60,16 @@ public class MyGL extends DebugGL2 {
 	}
 	
 	public void drawBresenhamLine(int x1, int y1, int x2, int y2) {
-		boolean invert = false;
-		if(x1 == x2) {
+		boolean swap = false;
+		boolean flip = false;
+		if(Math.abs(y2 - y1) > Math.abs(x2 - x1)) {
 			int aux = x1;
 			x1 = y1;
 			y1 = aux;
 			aux = x2;
 			x2 = y2;
 			y2 = aux;
-			invert = true;
+			swap = true;
 		}
 		if(x1 > x2) {
 			int aux = x1;
@@ -78,6 +79,12 @@ public class MyGL extends DebugGL2 {
 			y1 = y2;
 			y2 = aux;
 		}
+		if(y1 > y2) {
+			y1 = -y1;
+			y2 = -y2;
+			flip = true;
+		}
+		
 		int dx = x2 - x1;
 		int dy = y2 - y1;
 		int d = 2 * dy - dx;
@@ -85,8 +92,13 @@ public class MyGL extends DebugGL2 {
 		int incNE = 2 * (dy - dx);
 		int x = x1;
 		int y = y1;
-		if(invert) drawPixel(y, x);
-		else drawPixel(x, y);
+		if(swap) 
+			if(flip) drawPixel(y, -x);
+			else drawPixel(y, x);
+		else 
+			if(flip) drawPixel(x, -y);
+			else drawPixel(x, y);
+		
 		while(x < x2) {
 			if(d <= 0) {
 				//E
@@ -98,23 +110,28 @@ public class MyGL extends DebugGL2 {
 				x++;
 				y++;
 			}
-			if(invert) drawPixel(y, x);
-			else drawPixel(x, y);
+			if(swap) 
+				if(flip) drawPixel(-y, x);
+				else drawPixel(y, x);
+			else 
+				if(flip) drawPixel(x, -y);
+				else drawPixel(x, y);
 		}
 	}
 	
 	public void drawLine(int x1, int y1, int x2, int y2) {
 		int x, y;
 		float a;
-		boolean invert = false;
-		if(x1 == x2) {
+		boolean swap = false;
+		boolean flip = false;
+		if(Math.abs(y2 - y1) > Math.abs(x2 - x1)) {
 			int aux = x1;
 			x1 = y1;
 			y1 = aux;
 			aux = x2;
 			x2 = y2;
 			y2 = aux;
-			invert = true;
+			swap = true;
 		}
 		if(x1 > x2) {
 			int aux = x1;
@@ -124,11 +141,21 @@ public class MyGL extends DebugGL2 {
 			y1 = y2;
 			y2 = aux;
 		}
-		a = (y2 - y1)/(x2 - x1);
+		if(y1 > y2) {
+			y1 = -y1;
+			y2 = -y2;
+			flip = true;
+		}
+		
+		a = (float) Math.abs(y2 - y1)/Math.abs(x2 - x1);
 		for(x = x1; x <= x2; x++) {
 			y = (int) (y1+a*(x-x1));
-			if(invert) drawPixel(y,x);
-			else drawPixel(x, y);
+			if(swap) 
+				if(flip) drawPixel(-y, x);
+				else drawPixel(y, x);
+			else 
+				if(flip) drawPixel(x, -y);
+				else drawPixel(x, y);
 		}
 		
 	}
