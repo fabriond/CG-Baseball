@@ -232,6 +232,7 @@ public class FieldCanvas extends GLCanvas implements GLEventListener{
 	
 	public void clearStands() {
 		stands.clear();
+		standColors.clear();
 		display();
 	}
 	
